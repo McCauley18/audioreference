@@ -35,7 +35,7 @@ from BEATs import BEATs, BEATsConfig
 
 
 # ============================================================
-# CONFIG
+# CONFIG  
 # ============================================================
 BEATS_CKPT  = "BEATs_iter3_plus_AS2M.pt"
 MODEL_CKPT  = "beats_polyphonic_finetuned.pth"
