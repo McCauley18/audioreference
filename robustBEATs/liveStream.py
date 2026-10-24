@@ -34,9 +34,7 @@ from scipy.io import wavfile
 from BEATs import BEATs, BEATsConfig
 
 
-# ============================================================
-# CONFIG  
-# ============================================================
+# CONFIG 
 BEATS_CKPT  = "BEATs_iter3_plus_AS2M.pt"
 MODEL_CKPT  = "beats_polyphonic_finetuned.pth"
 CLASS_NAMES = ["Gunshot", "Human", "Vehicle"]
@@ -47,7 +45,7 @@ DEVICE      = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 WIN_S       = 2.5
 WIN_SAMPLES = int(TARGET_SR * WIN_S)
 
-# CFAR defaults (mirror the Streamlit app)
+# CFAR defaults
 BLOCK_MS      = 10
 N_REF         = 16
 N_GUARD       = 2
@@ -55,14 +53,12 @@ ALPHA         = 8.0
 MIN_ACTIVE_MS = 20
 HANGOVER_MS   = 100
 
-# Gate → model policy
+# Gate model policy
 COOLDOWN_S  = 0.5     # min seconds between model calls
 PROB_THRESH = 0.5     # label a class if sigmoid > this
 
 
-# ============================================================
 # MODEL
-# ============================================================
 class BEATsClassifier(nn.Module):
     def __init__(self, beats_model, num_classes):
         super().__init__()
@@ -89,14 +85,12 @@ def load_model():
     return model
 
 
-# ============================================================
 # STREAMING CFAR GATE
-# ============================================================
 class StreamingCFARGate:
     """
     Stateful cell-averaging CFAR. Push audio in, get one record per
     completed block. Numerically identical to CFARGate.process() on
-    the same audio — just incremental.
+    the same audio just incremental.
 
     Ring buffer invariant once warm:
         power_buf[head : head+n_ref]  (mod L) == the n_ref reference cells
@@ -178,9 +172,7 @@ class StreamingCFARGate:
         return out
 
 
-# ============================================================
-# ROLLING BUFFER (holds last WIN_S seconds)
-# ============================================================
+# holds last window secondz
 class RollingBuffer:
     def __init__(self, length):
         self.length = int(length)
@@ -200,9 +192,7 @@ class RollingBuffer:
         return self.buf.copy()
 
 
-# ============================================================
-# INFERENCE WORKER (runs BEATs off the audio path)
-# ============================================================
+# runs BEATs off the audio path
 class InferenceWorker:
     def __init__(self, model, device, class_names, save_dir=None):
         self.model = model
@@ -265,9 +255,7 @@ class InferenceWorker:
         print(f"          saved → {fname}", flush=True)
 
 
-# ============================================================
-# CLI / SETUP
-# ============================================================
+# SETUP
 def list_audio_devices():
     print(sd.query_devices())
     print()
@@ -291,9 +279,7 @@ def parse_args():
     return p.parse_args()
 
 
-# ============================================================
-# MAIN
-# ============================================================
+
 def main():
     args = parse_args()
 
@@ -322,7 +308,7 @@ def main():
         try:
             audio_q.put_nowait(chunk)
         except queue.Full:
-            pass   # drop rather than block the audio thread
+            pass   # drop the audio thread
 
     print("=" * 62)
     print("  Real-time Audio Event Detector")
@@ -373,7 +359,7 @@ def main():
         sys.exit(1)
     except KeyboardInterrupt:
         print("\nStopped.")
-
+  
 
 if __name__ == "__main__":
     main()
